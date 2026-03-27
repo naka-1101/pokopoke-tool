@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light only">
+<title>ぽこポケ 生息地図鑑</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{overflow-y:scroll;scrollbar-width:none;color-scheme:light only;}
+html::-webkit-scrollbar{display:none;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif;background:#f5f5f5;min-height:100vh;-webkit-text-size-adjust:100%;overflow-y:auto;scrollbar-width:none;color-scheme:light only;color:#1a1a1a;}
+body::-webkit-scrollbar{display:none;}
+.sticky{position:sticky;top:0;z-index:100;background:#f5f5f5;border-bottom:1px solid #e0e0e0;}
+.header{padding:10px 14px 4px;display:flex;align-items:center;justify-content:space-between;}
+.title{font-size:17px;font-weight:700;color:#1a1a1a;}
+.global-stat{font-size:11px;color:#666;}
+.tabs{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;background:#f5f5f5;}
+.tabs::-webkit-scrollbar{height:0;display:none;}.tabs{scrollbar-width:none;}
+.tab{flex:0 0 auto;padding:7px 14px;border:none;border-bottom:3px solid transparent;background:transparent;color:#888;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;}
+.tab.active{font-weight:700;color:#1a1a1a;}
+.controls{padding:10px 14px 0;background:#f5f5f5;}
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.prog-info{flex:1;}
+.prog-labels{display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:3px;}
+.prog-labels b{font-weight:700;}
+.prog-bar{height:6px;border-radius:3px;background:#e5e7eb;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;transition:width .3s;}
+.toggle-btn{padding:5px 12px;font-size:12px;font-weight:600;border:1px solid #d1d5db;border-radius:6px;background:#fff;color:#555;cursor:pointer;white-space:nowrap;}
+.search-row{display:flex;gap:6px;margin-bottom:8px;}
+.search-wrap{flex:1;position:relative;min-width:0;}
+.search{width:100%;padding:8px 32px 8px 12px;border-radius:8px;border:1px solid #ddd;background:#fff;font-size:16px;outline:none;}
+.search-clear-inner{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:20px;height:20px;border:none;background:#ccc;color:#fff;border-radius:50%;font-size:11px;line-height:20px;text-align:center;cursor:pointer;padding:0;}
+.search-clear-inner.hidden{visibility:hidden;}
+.search-btn{padding:8px 14px;border-radius:8px;border:1px solid #d1d5db;background:#fff;font-size:13px;font-weight:600;color:#555;cursor:pointer;white-space:nowrap;}
+.filters{display:flex;gap:4px;margin-bottom:0;padding-bottom:10px;background:#f5f5f5;}
+.fbtn{padding:6px 0;border:none;font-size:13px;font-weight:600;cursor:pointer;border-radius:6px;flex:1;transition:all .15s;}
+.list{padding:0 14px 32px;background:#f5f5f5;}
+.card{margin-bottom:8px;border-radius:10px;overflow:hidden;border:1px solid #e0e0e0;background:#ffffff;}
+.card-header{width:100%;display:flex;align-items:center;gap:8px;padding:10px 12px;border:none;cursor:pointer;text-align:left;font-size:14px;font-weight:600;background:#ffffff;color:#1a1a1a;font-family:inherit;}
+.card-header:hover{background:rgba(0,0,0,.02);}
+.arrow{font-size:10px;color:#999;transition:transform .2s;flex-shrink:0;}
+.arrow.open{transform:rotate(90deg);}
+.no-badge{font-size:11px;font-weight:700;color:#fff;padding:2px 8px;border-radius:4px;}
+.card-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.comp-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:10px;flex-shrink:0;min-width:60px;text-align:center;height:22px;line-height:16px;}
+.comp-done{background:#dcfce7;color:#16a34a;}
+.comp-wip{background:#f3f4f6;color:#888;}
+.card-body{overflow:hidden;transition:max-height .25s ease,opacity .2s ease,padding .2s ease;}
+.card-body.shut{max-height:0;opacity:0;padding:0 12px;}
+.card-body.show{max-height:5000px;opacity:1;padding:0 12px 12px;}
+.recipe{padding:6px 10px;background:#f9fafb;border-radius:8px;margin-bottom:8px;font-size:13px;color:#555;}
+.recipe-label{font-weight:600;color:#888;margin-right:6px;font-size:12px;}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+@media(max-width:400px){.pgrid{grid-template-columns:repeat(2,1fr);}}
+.pcell{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid #eee;border-radius:8px;cursor:pointer;transition:all .15s;user-select:none;min-width:0;}
+.pcell:hover{border-color:#ccc;}
+.pcell.ck{background:#f0fdf4;border-color:#bbf7d0;}
+.pcell.ck .pname{color:#16a34a;}
+.circle{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.circle.off{border:2px solid #ddd;background:#fff;}
+.circle.on{border:2px solid #4ade80;background:#4ade80;}
+.pname{font-size:12px;font-weight:500;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .15s;}
+.empty{text-align:center;padding:32px;color:#999;font-size:14px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const H=[
+{n:1,nm:"緑の草むら",r:"みどりのくさ×4",p:["フシギダネ","ゼニガメ","イシツブテ","ヒトカゲ","ナゾノクサ","リザードン"]},
+{n:2,nm:"木かげの草むら",r:"みどりのくさ×4、大きな木（なんでも）×1",p:["ストライク","ハッサム","カイロス","マダツボミ","ホシガリス","ヘラクロス"]},
+{n:3,nm:"岩かげの草むら",r:"みどりのくさ×4、おおきないし×1",p:["ドッコラー","ドテッコツ","ワンリキー"]},
+{n:4,nm:"うるおう草むら",r:"みどりのくさ×4、みず×2",p:["ゼニガメ","ヌメイル","カメックス","ウッウ","カメール"]},
+{n:5,nm:"波打ちぎわの草むら",r:"みどりのくさ×4、うみのみず×2",p:["ヤドン","ヤドラン","ヤドキング"]},
+{n:6,nm:"高台の草むら",r:"みどりのくさ×4、高いところ×1",p:["ポッポ","ピジョン","ホーホー","ヨルノズク"]},
+{n:7,nm:"照らされた草むら",r:"明かり（なんでも）×1、草（なんでも）×4",p:["コンパン","モルフォン"]},
+{n:8,nm:"きれいな花畑",r:"はらっぱのはな×4",p:["ポッポ","ミツハニー","イーブイ","ホーホー","ブビィ","ピジョン"]},
+{n:9,nm:"木かげの花畑",r:"はらっぱのはな×4、きのみの木（なんでも）×1",p:["ヌメラ","ノクタス","クワガノン"]},
+{n:10,nm:"うるおう花畑",r:"はらっぱのはな×4、みず×2",p:["バルビート","イルミーゼ"]},
+{n:11,nm:"花いっぱいの景色",r:"はらっぱのはな×8",p:["ラフレシア","キレイハナ","ロゼリア"]},
+{n:12,nm:"高台の花畑",r:"はらっぱのはな×4、高いところ×1",p:["ポッポ","ミツハニー"]},
+{n:13,nm:"花に囲まれたお墓",r:"はらっぱのはな×4、おはか×1",p:["ヨマワル","サマヨール"]},
+{n:14,nm:"フラワーガーデン",r:"はらっぱのはな×4、いけがき（なんでも）×4",p:["ロズレイド","ビークイン"]},
+{n:15,nm:"フレッシュ野菜畑",r:"野菜畑（なんでも）×4、いけがき（なんでも）×4",p:["ミニリュウ","ハクリュー"]},
+{n:16,nm:"あたたかな風に乗って",r:"風力はつでんマシン×1、草（なんでも）×4",p:["ミニリュウ","モンメン","エルフーン"]},
+{n:17,nm:"キャンプセット",r:"キャンプセット×1",p:["ヒトカゲ","リザード"]},
+{n:18,nm:"修行の滝",r:"たき×1",p:["ミニリュウ","カイリュー"]},
+{n:19,nm:"腹ペコダイニング",r:"テーブルセット×1",p:["ニャース","ペルシアン"]},
+{n:20,nm:"ピクニックな食卓",r:"ピクニックセット×1",p:["イーブイ"]},
+{n:21,nm:"はなやかな机",r:"つくえ（なんでも）×1、はらっぱのはな×4",p:["バタフリー","トランセル"]},
+{n:22,nm:"緑のベンチ",r:"ベンチ×1、草（なんでも）×4",p:["ビードル","バタフリー"]},
+{n:23,nm:"照らされたベンチ",r:"ベンチ×1、明かり（なんでも）×1",p:["コンパン"]},
+{n:24,nm:"ジムの休けい所",r:"ベンチ×1、どのう×2",p:["カイリキー","ワンリキー"]},
+{n:25,nm:"かけこみ救急所",r:"救急箱×1",p:["ラッキー"]},
+{n:26,nm:"ジムの救急所",r:"救急箱×1、どのう×2",p:["ゴーリキー","ハリテヤマ"]},
+{n:27,nm:"道案内のカンバン",r:"みちしるべ×1",p:["キャタピー","トランセル"]},
+{n:28,nm:"大きな荷物をのせて",r:"だんボールのはこ×2、ておしぐるま×1",p:["ゴンベ","カビゴン"]},
+{n:29,nm:"木こりの作業場",r:"まるたのベンチ×1、きりかぶ（なんでも）×1、おの×1",p:["キノガッサ","キノココ"]},
+{n:30,nm:"ぬいぐるみとおやすみ",r:"ほしくさのベッド×1、ぬいぐるみ（なんでも）×1",p:["ピカチュウ","ピチュー"]},
+{n:31,nm:"やさしい光でおやすみ",r:"ほしくさのベッド×1、明かり（なんでも）×1",p:["ネイティ","ネイティオ"]},
+{n:32,nm:"お墓にお供えもの",r:"おはか×1、おそなえもの×1",p:["ゴース","ゴースト","ゲンガー"]},
+{n:33,nm:"ブキミなお墓にお供えもの",r:"おはか×1、おそなえもの×1、はかいし×2",p:["ゴースト","ジュペッタ"]},
+{n:34,nm:"ラッキー休けい所",r:"救急箱×1、ベッド（なんでも）×1、タンス（なんでも）×1",p:["ラッキー","ハピナス"]},
+{n:35,nm:"明かりと香りのユウワク",r:"明かり（なんでも）×1、おこう×2",p:["ガーディ","ウインディ"]},
+{n:36,nm:"日かげでプカプカ水遊び",r:"きのみの木（なんでも）×1、みず×2",p:["マリル","マリルリ"]},
+{n:37,nm:"さらさらな草むら",r:"みどりのくさ×4、すなじ×2",p:["サボネア","サンド"]},
+{n:38,nm:"工場の物置き",r:"てっこつ×3、だんボールのはこ×2",p:["コイル","レアコイル"]},
+{n:39,nm:"ぜいたくピヨピヨごはん",r:"とりのえさいれ×1、はな（なんでも）×4",p:["ミツハニー","ビークイン"]},
+{n:40,nm:"きのみのごちそうキャンプ",r:"キャンプセット×1、きのみの木（なんでも）×1",p:["ヒトカゲ","リザードン"]},
+{n:41,nm:"あまごいスポット",r:"みず×2、おこう×2",p:["ニョロゾ","ニョロボン"]},
+{n:42,nm:"にほんばれスポット",r:"おこう×2、すなじ×2",p:["ブーバー","ブビィ"]},
+{n:43,nm:"はかせのオタカラ",r:"ほんだな×1、つくえ（なんでも）×1、イス（なんでも）×1",p:["ポリゴン","ポリゴン2"]},
+{n:44,nm:"丸太の温もり",r:"まるたのベンチ×1、キャンプファイヤー×1",p:["イーブイ","ヒトカゲ"]},
+{n:45,nm:"きのみ大集合",r:"きのみの木（なんでも）×4",p:["カビゴン","ゴンベ"]},
+{n:46,nm:"ガーデンテラス",r:"いけがき（なんでも）×4、テーブルセット×1",p:["キレイハナ","ラフレシア"]},
+{n:47,nm:"木かげでぐっすりカビゴン",r:"大きな木（なんでも）×1、カビゴンクッション×1",p:["カビゴン"]},
+{n:48,nm:"古きよきアンティーク",r:"アンティーク（なんでも）×3",p:["ヤバチャ","ポットデス"]},
+{n:49,nm:"モンスターボールだらけ",r:"モンスターボール・オブジェ×3、モンスターボール・ラグ×4",p:["ビリリダマ","マルマイン"]},
+{n:50,nm:"黄色の草むら",r:"きいろのくさ×4",p:["ピカチュウ","ライチュウ","ニャース","ペルシアン","ピチュー","ガーディ"]},
+{n:51,nm:"木かげの黄色の草むら",r:"大きな木（なんでも）×1、きいろのくさ×4",p:["ズバット","ゴルバット","マクノシタ","ハリテヤマ"]},
+{n:52,nm:"高台の黄色の草むら",r:"高いところ×1、きいろのくさ×4",p:["キャモメ","ペリッパー","クロバット"]},
+{n:53,nm:"うるおう黄色の草むら",r:"みず×2、きいろのくさ×4",p:["ルリリ","マリル","ポッチャマ","ポッタイシ"]},
+{n:54,nm:"沼地の草むら",r:"きいろのくさ×4、どろみず×2",p:["ドオー","パルデアウパー"]},
+{n:55,nm:"草むらの自販機",r:"きいろのくさ×4、じどうはんばいき×1",p:["メリープ"]},
+{n:56,nm:"すずしげな花畑",r:"うみべのはな×4",p:["パモ","ゾロア","ゾロアーク"]},
+{n:57,nm:"南国気分",r:"うみべのはな×4、おおきなヤシの木×1",p:["クサイハナ","タマタマ","ナッシー"]},
+{n:58,nm:"風の花畑",r:"うみべのはな×1、風力はつでんマシン×1",p:["キャモメ","ペリッパー"]},
+{n:59,nm:"ビーチの木かげ",r:"おおきなヤシの木×1、ビーチチェア×1",p:["ナッシー","タマタマ"]},
+{n:60,nm:"トロピカルシーサイド",r:"うみのみず×2、いけがき（なんでも）×4、おおきなヤシの木×1",p:["ラプラス"]},
+{n:61,nm:"お休みどころ",r:"ほしくさのベッド×1、だんボールのはこ×1",p:["ニャース"]},
+{n:62,nm:"おかたづけをしよう",r:"だんボールのはこ×3",p:["ニャース","ペルシアン"]},
+{n:63,nm:"ゴミ集積所",r:"ゴミぶくろ×2、ゴミ入れ（なんでも）×1",p:["ベトベター","ベトベトン"]},
+{n:64,nm:"ゴミ箱がいっぱい",r:"ゴミ入れ（なんでも）×3",p:["ヤブクロン","ダストダス"]},
+{n:65,nm:"ゴミ捨て場",r:"ゴミぶくろ×4",p:["ヤブクロン","ダストダス"]},
+{n:66,nm:"公園のベンチ",r:"ベンチ×1、街灯×1",p:["ニャース","ペルシアン"]},
+{n:67,nm:"腹ペコレストラン",r:"テーブルセット×1、コック帽×1",p:["ガーディ","ウインディ"]},
+{n:68,nm:"お料理をお届け",r:"ておしぐるま×1、コック帽×1",p:["ペルシアン"]},
+{n:69,nm:"ピヨピヨごはん",r:"とりのえさいれ×1",p:["ピチュー"]},
+{n:70,nm:"カフェスペース",r:"カフェテーブル×1、カフェイス×2",p:["ブラッキー"]},
+{n:71,nm:"ビーチセット",r:"ビーチチェア×1、パラソル×1、うみのみず×2",p:["ヒトデマン","スターミー"]},
+{n:72,nm:"ライトアップステージ",r:"ステージだい×1、スポットライト×2",p:["プリン","ププリン","プクリン"]},
+{n:73,nm:"しかけにご注意",r:"おとしあなのしかけ×2",p:["ディグダ","ダグトリオ"]},
+{n:74,nm:"夜のお祭り会場",r:"やたい（なんでも）×3、ちょうちん×4",p:["カゲボウズ","ジュペッタ"]},
+{n:75,nm:"お着がえスペース",r:"ようふくかけ×1、すがたみ×1",p:["エーフィ"]},
+{n:76,nm:"おめかし中は見ないで",r:"パーテーション×1、ようふくかけ×1、すがたみ×1",p:["エーフィ","ブラッキー"]},
+{n:77,nm:"毛糸で編み物",r:"けいと×1、イス（なんでも）×1",p:["モココ","デンリュウ"]},
+{n:78,nm:"温泉の洗い場",r:"おんせん×2、おけ×2",p:["コダック","ゴルダック"]},
+{n:79,nm:"リゾートでご飯のしたく",r:"テーブルセット×1、おおきなヤシの木×1",p:["ヤドン"]},
+{n:80,nm:"荷づくりできたよ",r:"だんボールのはこ×2、ガムテープ×1",p:["サンド","サンドパン"]},
+{n:81,nm:"完治までおやすみ",r:"ベッド（なんでも）×1、救急箱×1",p:["ラッキー","ハピナス"]},
+{n:82,nm:"目覚ましベッドスペース",r:"ベッド（なんでも）×1、めざましどけい×1",p:["ピッピ","ネイティオ"]},
+{n:83,nm:"自販機ヨコで一息",r:"じどうはんばいき×1、ベンチ×1",p:["メリープ","モココ"]},
+{n:84,nm:"自販機セット",r:"じどうはんばいき×2",p:["デンリュウ"]},
+{n:85,nm:"ミニゲームコーナー",r:"ゲーム台（なんでも）×1",p:["ポリゴン"]},
+{n:86,nm:"水力はつでん所",r:"たき×1、はつでんき×1",p:["エレキッド","エレブー"]},
+{n:87,nm:"火力はつでん所",r:"マグマ×1、はつでんき×1",p:["エレキッド","エレブー"]},
+{n:88,nm:"船着き場",r:"さんばし×1、つなひき用ロープ×1",p:["タッツー","シードラ","キングドラ"]},
+{n:89,nm:"あやしい書さい",r:"ほんだな×1、つくえ（なんでも）×1、イス（なんでも）×1、ロウソク×2",p:["ムウマ","ムウマージ"]},
+{n:90,nm:"ふなのりごっこ",r:"きのふね×1、うみのみず×2",p:["メノクラゲ","ドククラゲ"]},
+{n:91,nm:"レジでお会計",r:"レジカウンター×1",p:["ニャース","ペルシアン"]},
+{n:92,nm:"ちいさなアトリエ",r:"イーゼル×1、えのぐセット×1",p:["ドーブル"]},
+{n:93,nm:"グルメなお供え物",r:"おはか×1、テーブルセット×1",p:["ゲンガー"]},
+{n:94,nm:"ピカチュウスペース",r:"ピカチュウ・オブジェ×1",p:["ピカチュウ"]},
+{n:95,nm:"ベリーキュートな空間",r:"ベリーベリーのラグ×4",p:["イーブイ","ニンフィア"]},
+{n:96,nm:"リゾートへようこそ",r:"パラソル×1、おおきなヤシの木×1、ビーチチェア×1、うみのみず×2",p:["ラプラス","シャワーズ"]},
+{n:97,nm:"ナチュラルなくらし",r:"ウッドテーブル×1、ウッドイス×2、ウッドシェルフ×1",p:["リーフィア"]},
+{n:98,nm:"赤い草むら",r:"あかいくさ×4",p:["ガーディ","デルビル","ヒノアラシ","ヘルガー","ブースター","マグマラシ"]},
+{n:99,nm:"木かげの赤い草むら",r:"あかいくさ×4、さんかくの木×1",p:["ブビィ","ブーバー","ブーバーン"]},
+{n:100,nm:"三角木かげに岩と草むら",r:"あかいくさ×4、さんかくの木×1、おおきないし×1",p:["ヨーギラス","サナギラス"]},
+{n:101,nm:"うるおう赤い草むら",r:"あかいくさ×4、みず×2",p:["ハスボー","ハスブレロ"]},
+{n:102,nm:"高台の赤い草むら",r:"あかいくさ×4、高いところ×1",p:["ヤミカラス","ペラップ","ドンカラス"]},
+{n:103,nm:"草むらトレーニング場",r:"どのう×2、あかいくさ×4",p:["ゴーリキー","カイリキー"]},
+{n:104,nm:"ゆうがな花畑",r:"いわばのはな×4",p:["ピクシー","バウッツェル","パピモッチ","ピッピ","ピィ"]},
+{n:105,nm:"木かげのゆうがな花畑",r:"いわばのはな×4、さんかくの木×1",p:["ヤミカラス","メラルバ","ウルガモス"]},
+{n:106,nm:"うるおうゆうがな花畑",r:"いわばのはな×4、みず×2",p:["ニョロトノ","アーボック","アーボ"]},
+{n:107,nm:"花畑の切り株ステージ",r:"キノコのランプ×2、いわばのはな×4、きりかぶ（なんでも）×1",p:["ニョロトノ","プリン","ププリン"]},
+{n:108,nm:"畑しごとはたいへん",r:"ておしぐるま×1、野菜畑（なんでも）×4",p:["バンギラス"]},
+{n:109,nm:"うきうきな水たまり",r:"みず×2、うきくさ×4",p:["ハスボー","ルンパッパ"]},
+{n:110,nm:"コケまみれ",r:"コケ×4",p:["ヨーギラス","バンギラス"]},
+{n:111,nm:"コケまみれの岩",r:"こけいわ×1、コケ×4",p:["ゴローン","ゴローニャ"]},
+{n:112,nm:"コケむす温泉",r:"おんせん×2、コケ×4",p:["アーボ","アーボック"]},
+{n:113,nm:"露天風呂",r:"おんせん×2、おおきないし×1",p:["マグマッグ","マグカルゴ"]},
+{n:114,nm:"ととのう温泉",r:"おんせん×2、おけ×2、タオルかけ×1",p:["コダック","ゴルダック"]},
+{n:115,nm:"マグマでアツアツ",r:"マグマ×2",p:["マグマッグ","マグカルゴ"]},
+{n:116,nm:"掘って燃やして",r:"やまほりどうぐ×1、キャンプファイヤー×1",p:["ヒノアラシ","マグマラシ","バクフーン"]},
+{n:117,nm:"ガタゴト鉄骨工事",r:"てっこつ×3、ポールさんかくコーン×1",p:["ドッコラー","ドテッコツ"]},
+{n:118,nm:"ブキミな白い岩",r:"しろいいわ×2",p:["ヨマワル","ヨノワール"]},
+{n:119,nm:"荷物置き場でつまみ食い",r:"だんボールのはこ×2、テーブルセット×1",p:["ゴンベ"]},
+{n:120,nm:"ワクワクな食卓",r:"テーブルセット×1、明かり（なんでも）×1",p:["ブースター","ニャース"]},
+{n:121,nm:"パクパクパン工房",r:"パンがま×1",p:["パピモッチ","バウッツェル"]},
+{n:122,nm:"ミニキッチン",r:"キッチンカウンター×1、れいぞうこ×1",p:["ゴンベ","カビゴン"]},
+{n:123,nm:"みんなでパーティー",r:"テーブルセット×1、パーティーかざり×4",p:["ピカチュウ","イーブイ"]},
+{n:124,nm:"のんびり写真を振り返り",r:"ソファ（なんでも）×1、テレビ×1",p:["ヌメイル","ヌメルゴン"]},
+{n:125,nm:"さえずりのリサイタル",r:"スタンドマイク×1、おんぷマット（なんでも）×4",p:["ペラップ","チルット","チルタリス"]},
+{n:126,nm:"リサイタルステージ",r:"スタンドマイク×1、ステージだい×1",p:["プクリン","プリン"]},
+{n:127,nm:"リズムに合わせてワンツー",r:"スタンドマイク×1、どのう×2",p:["コジョフー","コジョンド"]},
+{n:128,nm:"音楽と読書",r:"スピーカー×2、ほんだな×1",p:["バリヤード","マネネ"]},
+{n:129,nm:"プチ博物館",r:"だいざ・てんじだい×1、えかけ×2",p:["ドーブル","マネネ"]},
+{n:130,nm:"さわやかロッカールーム",r:"ロッカー×1",p:["エビワラー","サワムラー"]},
+{n:131,nm:"銅像の観光スポット",r:"どうぞう×1",p:["ドーブル"]},
+{n:132,nm:"ふみきり",r:"ふみきり×1",p:["エレキッド"]},
+{n:133,nm:"シェフの調理場",r:"キッチンカウンター×1、コック帽×1、れいぞうこ×1",p:["ウインディ","ガーディ"]},
+{n:134,nm:"ザ・ゴージャス",r:"ゴージャス（なんでも）×3",p:["ニャース","ペルシアン"]},
+{n:135,nm:"ずっしりアイアン",r:"おもたいダンベル×3",p:["カイリキー","エビワラー","サワムラー"]},
+{n:136,nm:"モダンライフ",r:"モダンランプ×1、モダンテーブル×1、モダンイス×2",p:["グレイシア"]},
+{n:137,nm:"ピンクの草むら",r:"ピンクのくさ×4",p:["ニドラン♀","ニドリーナ","ニドラン♂","ニドリーノ","パモ","パーモット"]},
+{n:138,nm:"木かげのピンクの草むら",r:"ピンクのくさ×4、ヤシの木（なんでも）×1",p:["チェリンボ","チェリム","パモット"]},
+{n:139,nm:"うるおうピンクの草むら",r:"ピンクのくさ×4、みず×2",p:["ニドクイン","ニドキング"]},
+{n:140,nm:"高台のピンクの草むら",r:"ピンクのくさ×4、高いところ×1",p:["チルット","チルタリス"]},
+{n:141,nm:"土管の秘密基地",r:"どかん×3",p:["ニドラン♀","ニドラン♂"]},
+{n:142,nm:"フワフワな花畑",r:"まっさらのはな×4",p:["ラルトス","ポニータ","ギャロップ","キルリア","エルレイド","サーナイト"]},
+{n:143,nm:"木かげのフワフワな花畑",r:"まっさらのはな×4、ヤシの木（なんでも）×1",p:["チェリンボ","チェリム"]},
+{n:144,nm:"うるおうフワフワな花畑",r:"まっさらのはな×4、みず×2",p:["ポニータ","ギャロップ"]},
+{n:145,nm:"水辺の小舟",r:"きのふね×1、みず×2",p:["タッツー","シードラ"]},
+{n:146,nm:"照らされた滝",r:"たき×1、スポットライト×2",p:["カイリュー"]},
+{n:147,nm:"さえずりガーデン",r:"とりのえさいれ×1、はな（なんでも）×4、いけがき（なんでも）×4",p:["チルタリス","ビークイン"]},
+{n:148,nm:"シンプルバスルーム",r:"おふろ×1、おけ×2",p:["ゴルダック","コダック"]},
+{n:149,nm:"サイクリング中に休けい",r:"じてんしゃ×1、ベンチ×1",p:["エレブー","エレキブル"]},
+{n:150,nm:"暖炉でうたた寝",r:"だんろ×1、ソファ（なんでも）×1",p:["ウインディ","ブースター"]},
+{n:151,nm:"みなぎるサイコパワー",r:"すいしょうだま×1、シンプルなクッション×1",p:["ケーシィ","フーディン"]},
+{n:152,nm:"水晶占い",r:"つくえ（なんでも）×1、イス（なんでも）×2、すいしょうだま×1",p:["ケーシィ","ユンゲラー"]},
+{n:153,nm:"ゴミ捨て場のテレビ",r:"ゴミぶくろ×2、テレビ×1",p:["サマヨール","ヨノワール"]},
+{n:154,nm:"粗大ゴミ置き場",r:"てっこつ×3、ゴミ入れ（なんでも）×1、タイヤ×1、でんしレンジ×1",p:["カヌチャン","デカヌチャン"]},
+{n:155,nm:"相棒と取り調べ",r:"インダストリアルなデスク×1、ウインディにんぎょう×1、パイプイス×2、デスクライト×1",p:["ニャオハ","ニャローテ"]},
+{n:156,nm:"マンホール点検中",r:"やまほりどうぐ×1、こんもりてつパイプ×1、マンホール×1、ポールさんかくコーン×1",p:["ナカヌチャン","アーマーガア","ニョロボン"]},
+{n:157,nm:"ピカピカ洗面所",r:"せんめんだい×1、カベかけかがみ×1、カベかけタオル×1",p:["マネネ","バリヤード"]},
+{n:158,nm:"ホームシアター",r:"スピーカー×2、テレビ×1、だい（なんでも）×1",p:["ムウマージ"]},
+{n:159,nm:"勉強スペース",r:"ほんだな×1、つくえ（なんでも）×1、イス（なんでも）×1、えんぴついれ×1",p:["ラルトス","キルリア"]},
+{n:160,nm:"リズミカルなリビング",r:"スピーカー×2、テレビ×1、おんぷマット（なんでも）×4",p:["オンバット","オンバーン"]},
+{n:161,nm:"キュキュッとお掃除",r:"モップ×1、バケツ×1",p:["ジグザグマ","マッスグマ"]},
+{n:162,nm:"しっとり化粧台",r:"けしょうだい×1",p:["ニンフィア"]},
+{n:163,nm:"プチ図書館",r:"ほんだな×2",p:["ユンゲラー","フーディン"]},
+{n:164,nm:"ゲームコーナーで対戦",r:"ゲーム台（なんでも）×2",p:["ポリゴン","ポリゴン2"]},
+{n:165,nm:"プレイランド",r:"ゲーム台（なんでも）×1、ゴージャス（なんでも）×3",p:["ポリゴンZ"]},
+{n:166,nm:"おしごとデスク",r:"インダストリアルなデスク×1、パイプイス×2、デスクライト×1",p:["マスキッパ"]},
+{n:167,nm:"オフィスのバックヤード",r:"インダストリアルなデスク×1、パイプイス×2、だんボールのはこ×2",p:["ジグザグマ","マッスグマ"]},
+{n:168,nm:"実験スペース",r:"じっけんだい×1、パイプイス×1",p:["コイル","レアコイル"]},
+{n:169,nm:"はかせを目指して研究中",r:"じっけんだい×1、けんびきょう×1、パイプイス×1",p:["ジバコイル"]},
+{n:170,nm:"研究者のデスク",r:"けんびきょう×1、インダストリアルなデスク×1、パイプイス×1",p:["ポリゴン2","ポリゴンZ"]},
+{n:171,nm:"ご自由にお読みください",r:"ほんだな×2、ベンチ×1",p:["ユンゲラー","フーディン"]},
+{n:172,nm:"ドコドコびっくり箱",r:"びっくりばこ×2",p:["カゲボウズ"]},
+{n:173,nm:"いたずらスイッチ",r:"びっくりばこ×2、スイッチ×1",p:["ゴース","ゲンガー"]},
+{n:174,nm:"絶景の顔だしパネル",r:"かおだしパネル×1",p:["ドーブル"]},
+{n:175,nm:"タイヤ公園",r:"タイヤ×4",p:["マルマイン","ビリリダマ"]},
+{n:176,nm:"自然の中のマーケット",r:"やたい（なんでも）×3、草（なんでも）×4",p:["カゲボウズ","ジュペッタ"]},
+{n:177,nm:"工事現場のはつでん所",r:"はつでんき×1、てっこつ×3、ポールさんかくコーン×1",p:["エレキブル"]},
+{n:178,nm:"道場でトレーニング",r:"まとあて×1、どのう×2、サンドバッグ×1",p:["コジョフー","コジョンド"]},
+{n:179,nm:"悪の組織のアジト",r:"アジトデスク×1、アジトイス×2、アジトかんばん×1",p:["ゾロア","ゾロアーク"]},
+{n:180,nm:"九つのほむら",r:"かがりび×4、マグマ×1",p:["キュウコン"]},
+{n:181,nm:"ぬいぐるみに囲まれて",r:"ぬいぐるみ（なんでも）×4",p:["ピカチュウ","イーブイ"]},
+{n:182,nm:"バツグンのゲーム環境",r:"ゲーミングデスク×1、ゲーミングイス×1、モニター×1",p:["ポリゴンZ"]},
+{n:183,nm:"ポップオブポップ",r:"ポップサークル×4",p:["マリル","マリルリ","ルリリ"]},
+{n:184,nm:"釣り堀",r:"みず×2、イス（なんでも）×1、つりざお×1",p:["コイキング","ギャラドス"]},
+{n:185,nm:"海釣り",r:"うみのみず×2、イス（なんでも）×1、つりざお×1",p:["テッポウオ","オクタン"]},
+{n:186,nm:"沼釣り",r:"どろみず×2、イス（なんでも）×1、つりざお×1",p:["ハスボー","ハスブレロ"]},
+{n:187,nm:"温泉釣り",r:"おんせん×1、イス（なんでも）×1、つりざお×1",p:["ハスブレロ","ハスボー"]},
+{n:188,nm:"マグマ釣り",r:"マグマ×1、イス（なんでも）×1、つりざお×1",p:["ウインディ"]},
+{n:189,nm:"ハイなロックステージ",r:"スタンドマイク×1、ステージだい×1、スピーカー×2、イカしたエレキギター×1",p:["ストリンダー（ハイなすがた）"]},
+{n:190,nm:"ローなロックステージ",r:"スタンドマイク×1、ステージだい×1、スピーカー×2、イカしたエレキベース×1",p:["ストリンダー（ローなすがた）"]},
+{n:191,nm:"怨念の騎士の祭壇",r:"だいざ・てんじだい×1、ふみいし×2、ノロイノヨロイ×1、かがりび×2",p:["ソウブレイズ"]},
+{n:192,nm:"忠誠の騎士の祭壇",r:"だいざ・てんじだい×1、ふみいし×2、かがりび×2、イワイノヨロイ×1",p:["グレンアルマ"]},
+{n:193,nm:"ツバサのカセキ展示台",r:"ツバサのカセキ・うよく×1、ツバサのカセキ・さよく×1、だいざ・てんじだい×1、ツバサのカセキ・どう×1、ツバサのカセキ・しっぽ×1、ツバサのカセキ・あたま×1",p:["プテラ"]},
+{n:194,nm:"ずがいのカセキ展示台",r:"だいざ・てんじだい×1、ずがいのカセキ×1",p:["ズガイドス"]},
+{n:195,nm:"ずつきのカセキ展示台",r:"だいざ・てんじだい×1、ずつきのカセキ・しっぽ×1、ずつきのカセキ・あたま×1、ずつきのカセキ・どう×1",p:["ラムパルド"]},
+{n:196,nm:"たてのカセキ展示台",r:"だいざ・てんじだい×1、たてのカセキ×1",p:["タテトプス"]},
+{n:197,nm:"シールドのカセキ展示台",r:"だいざ・てんじだい×1、シールドのカセキ・しっぽ×1、シールドのカセキ・あたま×1、シールドのカセキ・どう×1",p:["トリデプス"]},
+{n:198,nm:"アゴのカセキ展示台",r:"だいざ・てんじだい×1、アゴのカセキ×1",p:["チゴラス"]},
+{n:199,nm:"ぼうくんのカセキ展示台",r:"だいざ・てんじだい×1、ぼうくんのカセキ・しっぽ×1、ぼうくんのカセキ・あたま×1、ぼうくんのカセキ・どう×1",p:["ガチゴラス"]},
+{n:200,nm:"ヒレのカセキ展示台",r:"だいざ・てんじだい×1、ヒレのカセキ×1",p:["アマルス"]},
+{n:201,nm:"ツンドラのカセキ展示台",r:"だいざ・てんじだい×1、ツンドラのカセキ・しっぽ×1、ツンドラのカセキ・あたま×1、ツンドラのカセキ・どう×1",p:["アマルルガ"]},
+{n:202,nm:"はじけるブルー",r:"ポケモンパンケース×1、ポケモンパン・ちぎりブルー×1",p:["ゼニガメ"]},
+{n:203,nm:"シビれるポテト",r:"ポケモンパンケース×1、ポケモンパン・シビれるポテト×1",p:["ピカチュウ"]},
+{n:204,nm:"もえるほどスパイシー",r:"ポケモンパンケース×1、ポケモンパン・もえるほどスパイシー×1",p:["ヒトカゲ"]},
+{n:205,nm:"エレガントな昼下がり",r:"ポケモンパンケース×1、ポケモンパン・エレガントな昼下がり×1",p:["イーブイ"]},
+{n:206,nm:"ブラックな味わい",r:"ポケモンパンケース×1、ポケモンパン・ブラックな味わい×1",p:["ゲンガー"]},
+{n:207,nm:"緑のサンドイッチ",r:"ポケモンパンケース×1、ポケモンパン・緑のサンドイッチ×1",p:["フシギダネ"]},
+{n:208,nm:"ヒンヤリかき氷",r:"ポケモンパンケース×1、ポケモンパン・ヒンヤリかき氷×1",p:["コダック"]},
+{n:209,nm:"ラブリーなケーキ",r:"ポケモンパンケース×1、ポケモンパン・ラブリーなケーキ×1",p:["プリン"]}
+];
+
+const GN={
+g1:new Set([...Array.from({length:49},(_,i)=>i+1),184,185]),
+g2:new Set([...Array.from({length:48},(_,i)=>i+50),186]),
+g3:new Set([...Array.from({length:39},(_,i)=>i+98),187,188,...Array.from({length:9},(_,i)=>i+193)]),
+g4:new Set(Array.from({length:47},(_,i)=>i+137)),
+g5:new Set([189,190,191,192,...Array.from({length:8},(_,i)=>i+202)])
+};
+const GS=[
+{id:"g1",name:"パサパサこうや",color:"#c9a24d"},
+{id:"g2",name:"ドンヨリうみべ",color:"#8bb8e0"},
+{id:"g3",name:"ゴツゴツやま",color:"#a1887f"},
+{id:"g4",name:"キラキラうきしま",color:"#d4a0b9"},
+{id:"g5",name:"まっさらな街",color:"#7cb89e"}
+];
+const SK="pokopoke-v5";
+
+let state={group:"g1",checks:{},search:"",filter:"all",openSet:new Set()};
+
+function loadChecks(){try{const d=localStorage.getItem(SK);if(d)state.checks=JSON.parse(d);}catch{}}
+function saveChecks(){try{localStorage.setItem(SK,JSON.stringify(state.checks));}catch{}}
+function getGroupHabitats(){return H.filter(h=>GN[state.group]?.has(h.n));}
+function getUnique(habs){const s=new Set();habs.forEach(h=>h.p.forEach(p=>s.add(p)));return[...s];}
+function getAllUnique(){const s=new Set();H.forEach(h=>h.p.forEach(p=>s.add(p)));return[...s];}
+
+let composing=false;
+function render(){
+  const app=document.getElementById("app");
+  const grp=GS.find(g=>g.id===state.group);
+  const gHabs=getGroupHabitats();
+  const uq=getUnique(gHabs);
+  const totalU=uq.length,checkedU=uq.filter(p=>state.checks[p]).length;
+  const allUq=getAllUnique();
+  const gTotal=allUq.length,gChecked=allUq.filter(p=>state.checks[p]).length;
+  const allOpen=gHabs.length>0&&gHabs.every(h=>state.openSet.has(h.n));
+
+  const filtered=gHabs.filter(h=>{
+    const q=state.search.toLowerCase();
+    const ms=!q||h.nm.toLowerCase().includes(q)||h.p.some(p=>p.toLowerCase().includes(q));
+    if(!ms)return false;
+    if(state.filter==="done")return h.p.every(p=>state.checks[p]);
+    if(state.filter==="undone")return h.p.some(p=>!state.checks[p]);
+    return true;
+  });
+
+  let html=`<div class="sticky">
+    <div class="header"><span class="title">生息地図鑑</span><span class="global-stat">${gChecked}/${gTotal} 種コンプ</span></div>
+    <div class="tabs">`;
+  GS.forEach(g=>{
+    const a=g.id===state.group;
+    html+=`<button class="tab${a?" active":""}" style="border-bottom-color:${a?g.color:"transparent"};background:${a?g.color+"15":"transparent"};${a?"color:#1a1a1a;":""}" onclick="switchGroup('${g.id}')">${g.name}</button>`;
+  });
+  html+=`</div></div>`;
+
+  html+=`<div class="controls">
+    <div class="prog-row"><div class="prog-info">
+      <div class="prog-labels"><span>エリア進捗</span><b>${checkedU}/${totalU}</b></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${totalU?((checkedU/totalU)*100):0}%;background:${grp.color}"></div></div>
+    </div>
+    <button class="toggle-btn" onclick="toggleAll()">${allOpen?"すべて閉じる":"すべて開く"}</button>
+    </div>
+    <div class="search-row">
+      <div class="search-wrap">
+        <input class="search" id="searchInput" type="text" placeholder="生息地名・ポケモン名で検索" value="${state.search}">
+        <button class="search-clear-inner${state.search?"":" hidden"}" onclick="clearSearch()">✕</button>
+      </div>
+      <button class="search-btn" onclick="execSearch()">検索</button>
+    </div>
+    <div class="filters">`;
+  [["all","すべて"],["done","コンプ済"],["undone","未コンプ"]].forEach(([v,l])=>{
+    html+=`<button class="fbtn" style="background:${state.filter===v?grp.color:"#e8e8e8"};color:${state.filter===v?"#fff":"#666"}" onclick="setFilter('${v}')">${l}</button>`;
+  });
+  html+=`</div></div>`;
+
+  html+=`<div class="list">`;
+  if(filtered.length===0){html+=`<div class="empty">該当なし</div>`;}
+  filtered.forEach(h=>{
+    const isOpen=state.openSet.has(h.n);
+    const hDone=h.p.every(p=>state.checks[p]);
+    const hCnt=h.p.filter(p=>state.checks[p]).length;
+    html+=`<div class="card">
+      <button class="card-header" onclick="toggleAcc(${h.n})">
+        <span class="arrow${isOpen?" open":""}">▶</span>
+        <span class="no-badge" style="background:${grp.color}">No.${h.n}</span>
+        <span class="card-name">${h.nm}</span>
+        <span class="comp-badge ${hDone?"comp-done":"comp-wip"}">${hDone?"コンプ済":`${hCnt}/${h.p.length}`}</span>
+      </button>
+      <div class="card-body ${isOpen?"show":"shut"}">
+        <div class="recipe"><span class="recipe-label">作り方:</span>${h.r}</div>
+        <div class="pgrid">`;
+    h.p.forEach((p,i)=>{
+      const done=!!state.checks[p];
+      html+=`<div class="pcell${done?" ck":""}" onclick="togglePoke('${p.replace(/'/g,"\\'")}')">
+        <div class="circle ${done?"on":"off"}">${done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':""}</div>
+        <span class="pname">${p}</span>
+      </div>`;
+    });
+    html+=`</div></div></div>`;
+  });
+  html+=`</div>`;
+  app.innerHTML=html;
+}
+
+function switchGroup(id){state.group=id;state.search="";state.filter="all";render();}
+function togglePoke(name){state.checks[name]=!state.checks[name];saveChecks();render();}
+function toggleAcc(n){state.openSet.has(n)?state.openSet.delete(n):state.openSet.add(n);render();}
+function toggleAll(){
+  const gHabs=getGroupHabitats();
+  const allOpen=gHabs.every(h=>state.openSet.has(h.n));
+  gHabs.forEach(h=>{allOpen?state.openSet.delete(h.n):state.openSet.add(h.n);});
+  render();
+}
+function execSearch(){const el=document.getElementById("searchInput");if(el){state.search=el.value;render();}}
+function clearSearch(){state.search="";render();}
+function doSearch(v){state.search=v;render();}
+function setFilter(v){state.filter=v;render();}
+
+loadChecks();
+render();
+</script>
+</body>
+</html>
