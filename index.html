@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -54,14 +55,15 @@ body::-webkit-scrollbar{display:none;}
 .recipe-label{font-weight:600;color:#888;margin-right:6px;font-size:12px;}
 .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
 @media(max-width:400px){.pgrid{grid-template-columns:repeat(2,1fr);}}
-.pcell{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid #eee;border-radius:8px;cursor:pointer;transition:all .15s;user-select:none;min-width:0;}
+.pcell{display:flex;align-items:center;gap:4px;padding:6px 8px;border:1px solid #eee;border-radius:8px;cursor:pointer;transition:all .15s;user-select:none;min-width:0;}
 .pcell:hover{border-color:#ccc;}
 .pcell.ck{background:#f0fdf4;border-color:#bbf7d0;}
 .pcell.ck .pname{color:#16a34a;}
-.circle{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.circle{width:18px;height:18px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
 .circle.off{border:2px solid #ddd;background:#fff;}
 .circle.on{border:2px solid #4ade80;background:#4ade80;}
-.pname{font-size:12px;font-weight:500;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .15s;}
+.psprite{width:32px;height:32px;flex-shrink:0;image-rendering:pixelated;}
+.pname{font-size:11px;font-weight:500;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .15s;}
 .empty{text-align:center;padding:32px;color:#999;font-size:14px;}
 </style>
 </head>
@@ -281,123 +283,100 @@ const H=[
 ];
 
 const GN={
-g1:new Set([...Array.from({length:49},(_,i)=>i+1),184,185]),
-g2:new Set([...Array.from({length:48},(_,i)=>i+50),186]),
-g3:new Set([...Array.from({length:39},(_,i)=>i+98),187,188,...Array.from({length:9},(_,i)=>i+193)]),
-g4:new Set(Array.from({length:47},(_,i)=>i+137)),
-g5:new Set([189,190,191,192,...Array.from({length:8},(_,i)=>i+202)])
+g1:new Set([…Array.from({length:49},(*,i)=>i+1),184,185]),
+g2:new Set([…Array.from({length:48},(*,i)=>i+50),186]),
+g3:new Set([…Array.from({length:39},(*,i)=>i+98),187,188,…Array.from({length:9},(*,i)=>i+193)]),
+g4:new Set(Array.from({length:47},(*,i)=>i+137)),
+g5:new Set([189,190,191,192,…Array.from({length:8},(*,i)=>i+202)])
 };
 const GS=[
-{id:"g1",name:"パサパサこうや",color:"#c9a24d"},
-{id:"g2",name:"ドンヨリうみべ",color:"#8bb8e0"},
-{id:"g3",name:"ゴツゴツやま",color:"#a1887f"},
-{id:"g4",name:"キラキラうきしま",color:"#d4a0b9"},
-{id:"g5",name:"まっさらな街",color:"#7cb89e"}
+{id:“g1”,name:“パサパサこうや”,color:”#c9a24d”},
+{id:“g2”,name:“ドンヨリうみべ”,color:”#8bb8e0”},
+{id:“g3”,name:“ゴツゴツやま”,color:”#a1887f”},
+{id:“g4”,name:“キラキラうきしま”,color:”#d4a0b9”},
+{id:“g5”,name:“まっさらな街”,color:”#7cb89e”}
 ];
-const SK="pokopoke-v5";
+const SK=“pokopoke-v5”;
 
-let state={group:"g1",checks:{},search:"",filter:"all",openSet:new Set()};
+const PID={“フシギダネ”:1,“ゼニガメ”:7,“イシツブテ”:74,“ヒトカゲ”:4,“ナゾノクサ”:43,“リザードン”:6,“ストライク”:123,“ハッサム”:212,“カイロス”:127,“マダツボミ”:69,“ホシガリス”:819,“ヘラクロス”:214,“ドッコラー”:532,“ドテッコツ”:533,“ワンリキー”:66,“ヌメイル”:705,“カメックス”:9,“ウッウ”:845,“カメール”:8,“ヤドン”:79,“ヤドラン”:80,“ヤドキング”:199,“ポッポ”:16,“ピジョン”:17,“ホーホー”:163,“ヨルノズク”:164,“コンパン”:48,“モルフォン”:49,“ミツハニー”:415,“イーブイ”:133,“ブビィ”:240,“ヌメラ”:704,“ノクタス”:332,“クワガノン”:738,“バルビート”:313,“イルミーゼ”:314,“ラフレシア”:45,“キレイハナ”:182,“ロゼリア”:315,“ロズレイド”:407,“ビークイン”:416,“ヨマワル”:355,“サマヨール”:356,“ミニリュウ”:147,“ハクリュー”:148,“モンメン”:546,“エルフーン”:547,“リザード”:5,“ニャース”:52,“ペルシアン”:53,“バタフリー”:12,“トランセル”:11,“ビードル”:13,“カイリキー”:68,“ラッキー”:113,“ゴーリキー”:67,“ハリテヤマ”:297,“キャタピー”:10,“ゴンベ”:446,“カビゴン”:143,“キノガッサ”:286,“キノココ”:285,“ピカチュウ”:25,“ピチュー”:172,“ネイティ”:177,“ネイティオ”:178,“ゴース”:92,“ゴースト”:93,“ゲンガー”:94,“ジュペッタ”:354,“ハピナス”:242,“ガーディ”:58,“ウインディ”:59,“マリル”:183,“マリルリ”:184,“サボネア”:331,“サンド”:27,“コイル”:81,“レアコイル”:82,“ニョロゾ”:61,“ニョロボン”:62,“ブーバー”:126,“ポリゴン”:137,“ポリゴン2”:233,“ヤバチャ”:854,“ポットデス”:855,“ビリリダマ”:100,“マルマイン”:101,“ライチュウ”:26,“ズバット”:41,“ゴルバット”:42,“マクノシタ”:296,“キャモメ”:278,“ペリッパー”:279,“クロバット”:169,“ルリリ”:298,“ポッチャマ”:393,“ポッタイシ”:394,“ドオー”:982,“パルデアウパー”:194,“メリープ”:179,“パモ”:921,“ゾロア”:570,“ゾロアーク”:571,“クサイハナ”:44,“タマタマ”:102,“ナッシー”:103,“ラプラス”:131,“ベトベター”:88,“ベトベトン”:89,“ヤブクロン”:568,“ダストダス”:569,“ディグダ”:50,“ダグトリオ”:51,“カゲボウズ”:353,“エーフィ”:196,“ブラッキー”:197,“モココ”:180,“デンリュウ”:181,“コダック”:54,“ゴルダック”:55,“サンドパン”:28,“ピッピ”:35,“ヒトデマン”:120,“スターミー”:121,“プリン”:39,“ププリン”:174,“プクリン”:40,“エレキッド”:239,“エレブー”:125,“タッツー”:116,“シードラ”:117,“キングドラ”:230,“ムウマ”:200,“ムウマージ”:429,“メノクラゲ”:72,“ドククラゲ”:73,“ドーブル”:235,“ニンフィア”:700,“シャワーズ”:134,“リーフィア”:470,“デルビル”:228,“ヒノアラシ”:155,“ヘルガー”:229,“ブースター”:136,“マグマラシ”:156,“ブーバーン”:467,“ヨーギラス”:246,“サナギラス”:247,“ハスボー”:270,“ハスブレロ”:271,“ヤミカラス”:198,“ペラップ”:441,“ドンカラス”:430,“ピクシー”:36,“バウッツェル”:928,“パピモッチ”:927,“ピィ”:173,“メラルバ”:636,“ウルガモス”:637,“ニョロトノ”:186,“アーボック”:24,“アーボ”:23,“バンギラス”:248,“ルンパッパ”:272,“ゴローン”:75,“ゴローニャ”:76,“マグマッグ”:218,“マグカルゴ”:219,“バクフーン”:157,“ヨノワール”:477,“ポリゴンZ”:474,“エレキブル”:466,“コジョフー”:619,“コジョンド”:620,“バリヤード”:122,“マネネ”:439,“エビワラー”:107,“サワムラー”:106,“グレイシア”:471,“ニドラン♀”:29,“ニドリーナ”:30,“ニドラン♂”:32,“ニドリーノ”:33,“パーモット”:923,“チェリンボ”:420,“チェリム”:421,“パモット”:922,“ニドクイン”:31,“ニドキング”:34,“チルット”:333,“チルタリス”:334,“ラルトス”:280,“ポニータ”:77,“ギャロップ”:78,“キルリア”:281,“エルレイド”:475,“サーナイト”:282,“カイリュー”:149,“オンバット”:714,“オンバーン”:715,“ジグザグマ”:263,“マッスグマ”:264,“ユンゲラー”:64,“フーディン”:65,“ケーシィ”:63,“カヌチャン”:957,“デカヌチャン”:959,“ニャオハ”:906,“ニャローテ”:907,“ナカヌチャン”:958,“アーマーガア”:823,“マスキッパ”:455,“ジバコイル”:462,“ヌメルゴン”:706,“ストリンダー（ハイなすがた）”:849,“ストリンダー（ローなすがた）”:849,“ソウブレイズ”:937,“グレンアルマ”:936,“プテラ”:142,“ズガイドス”:408,“ラムパルド”:409,“タテトプス”:410,“トリデプス”:411,“チゴラス”:696,“ガチゴラス”:697,“アマルス”:698,“アマルルガ”:699,“コイキング”:129,“ギャラドス”:130,“テッポウオ”:223,“オクタン”:224,“キュウコン”:38};
+function spriteUrl(name){const id=PID[name];return id?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`:””;}
+
+let state={group:“g1”,checks:{},search:””,filter:“all”,openSet:new Set()};
 
 function loadChecks(){try{const d=localStorage.getItem(SK);if(d)state.checks=JSON.parse(d);}catch{}}
 function saveChecks(){try{localStorage.setItem(SK,JSON.stringify(state.checks));}catch{}}
 function getGroupHabitats(){return H.filter(h=>GN[state.group]?.has(h.n));}
-function getUnique(habs){const s=new Set();habs.forEach(h=>h.p.forEach(p=>s.add(p)));return[...s];}
-function getAllUnique(){const s=new Set();H.forEach(h=>h.p.forEach(p=>s.add(p)));return[...s];}
+function getUnique(habs){const s=new Set();habs.forEach(h=>h.p.forEach(p=>s.add(p)));return[…s];}
+function getAllUnique(){const s=new Set();H.forEach(h=>h.p.forEach(p=>s.add(p)));return[…s];}
 
 let composing=false;
 function render(){
-  const app=document.getElementById("app");
-  const grp=GS.find(g=>g.id===state.group);
-  const gHabs=getGroupHabitats();
-  const uq=getUnique(gHabs);
-  const totalU=uq.length,checkedU=uq.filter(p=>state.checks[p]).length;
-  const allUq=getAllUnique();
-  const gTotal=allUq.length,gChecked=allUq.filter(p=>state.checks[p]).length;
-  const allOpen=gHabs.length>0&&gHabs.every(h=>state.openSet.has(h.n));
+const app=document.getElementById(“app”);
+const grp=GS.find(g=>g.id===state.group);
+const gHabs=getGroupHabitats();
+const uq=getUnique(gHabs);
+const totalU=uq.length,checkedU=uq.filter(p=>state.checks[p]).length;
+const allUq=getAllUnique();
+const gTotal=allUq.length,gChecked=allUq.filter(p=>state.checks[p]).length;
+const allOpen=gHabs.length>0&&gHabs.every(h=>state.openSet.has(h.n));
 
-  const filtered=gHabs.filter(h=>{
-    const q=state.search.toLowerCase();
-    const ms=!q||h.nm.toLowerCase().includes(q)||h.p.some(p=>p.toLowerCase().includes(q));
-    if(!ms)return false;
-    if(state.filter==="done")return h.p.every(p=>state.checks[p]);
-    if(state.filter==="undone")return h.p.some(p=>!state.checks[p]);
-    return true;
-  });
+const filtered=gHabs.filter(h=>{
+const q=state.search.toLowerCase();
+const ms=!q||h.nm.toLowerCase().includes(q)||h.p.some(p=>p.toLowerCase().includes(q));
+if(!ms)return false;
+if(state.filter===“done”)return h.p.every(p=>state.checks[p]);
+if(state.filter===“undone”)return h.p.some(p=>!state.checks[p]);
+return true;
+});
 
-  let html=`<div class="sticky">
-    <div class="header"><span class="title">生息地図鑑</span><span class="global-stat">${gChecked}/${gTotal} 種コンプ</span></div>
-    <div class="tabs">`;
-  GS.forEach(g=>{
-    const a=g.id===state.group;
-    html+=`<button class="tab${a?" active":""}" style="border-bottom-color:${a?g.color:"transparent"};background:${a?g.color+"15":"transparent"};${a?"color:#1a1a1a;":""}" onclick="switchGroup('${g.id}')">${g.name}</button>`;
-  });
-  html+=`</div></div>`;
+let html=`<div class="sticky"> <div class="header"><span class="title">生息地図鑑</span><span class="global-stat">${gChecked}/${gTotal} 種コンプ</span></div> <div class="tabs">`;
+GS.forEach(g=>{
+const a=g.id===state.group;
+html+=`<button class="tab${a?" active":""}" style="border-bottom-color:${a?g.color:"transparent"};background:${a?g.color+"15":"transparent"};${a?"color:#1a1a1a;":""}" onclick="switchGroup('${g.id}')">${g.name}</button>`;
+});
+html+=`</div></div>`;
 
-  html+=`<div class="controls">
-    <div class="prog-row"><div class="prog-info">
-      <div class="prog-labels"><span>エリア進捗</span><b>${checkedU}/${totalU}</b></div>
-      <div class="prog-bar"><div class="prog-fill" style="width:${totalU?((checkedU/totalU)*100):0}%;background:${grp.color}"></div></div>
-    </div>
-    <button class="toggle-btn" onclick="toggleAll()">${allOpen?"すべて閉じる":"すべて開く"}</button>
-    </div>
-    <div class="search-row">
-      <div class="search-wrap">
-        <input class="search" id="searchInput" type="text" placeholder="生息地名・ポケモン名で検索" value="${state.search}">
-        <button class="search-clear-inner${state.search?"":" hidden"}" onclick="clearSearch()">✕</button>
-      </div>
-      <button class="search-btn" onclick="execSearch()">検索</button>
-    </div>
-    <div class="filters">`;
-  [["all","すべて"],["done","コンプ済"],["undone","未コンプ"]].forEach(([v,l])=>{
-    html+=`<button class="fbtn" style="background:${state.filter===v?grp.color:"#e8e8e8"};color:${state.filter===v?"#fff":"#666"}" onclick="setFilter('${v}')">${l}</button>`;
-  });
-  html+=`</div></div>`;
+html+=`<div class="controls"> <div class="prog-row"><div class="prog-info"> <div class="prog-labels"><span>エリア進捗</span><b>${checkedU}/${totalU}</b></div> <div class="prog-bar"><div class="prog-fill" style="width:${totalU?((checkedU/totalU)*100):0}%;background:${grp.color}"></div></div> </div> <button class="toggle-btn" onclick="toggleAll()">${allOpen?"すべて閉じる":"すべて開く"}</button> </div> <div class="search-row"> <div class="search-wrap"> <input class="search" id="searchInput" type="text" placeholder="生息地名・ポケモン名で検索" value="${state.search}"> <button class="search-clear-inner${state.search?"":" hidden"}" onclick="clearSearch()">✕</button> </div> <button class="search-btn" onclick="execSearch()">検索</button> </div> <div class="filters">`;
+[[“all”,“すべて”],[“done”,“コンプ済”],[“undone”,“未コンプ”]].forEach(([v,l])=>{
+html+=`<button class="fbtn" style="background:${state.filter===v?grp.color:"#e8e8e8"};color:${state.filter===v?"#fff":"#666"}" onclick="setFilter('${v}')">${l}</button>`;
+});
+html+=`</div></div>`;
 
-  html+=`<div class="list">`;
-  if(filtered.length===0){html+=`<div class="empty">該当なし</div>`;}
-  filtered.forEach(h=>{
-    const isOpen=state.openSet.has(h.n);
-    const hDone=h.p.every(p=>state.checks[p]);
-    const hCnt=h.p.filter(p=>state.checks[p]).length;
-    html+=`<div class="card">
-      <button class="card-header" onclick="toggleAcc(${h.n})">
-        <span class="arrow${isOpen?" open":""}">▶</span>
-        <span class="no-badge" style="background:${grp.color}">No.${h.n}</span>
-        <span class="card-name">${h.nm}</span>
-        <span class="comp-badge ${hDone?"comp-done":"comp-wip"}">${hDone?"コンプ済":`${hCnt}/${h.p.length}`}</span>
-      </button>
-      <div class="card-body ${isOpen?"show":"shut"}">
-        <div class="recipe"><span class="recipe-label">作り方:</span>${h.r}</div>
-        <div class="pgrid">`;
-    h.p.forEach((p,i)=>{
-      const done=!!state.checks[p];
-      html+=`<div class="pcell${done?" ck":""}" onclick="togglePoke('${p.replace(/'/g,"\\'")}')">
-        <div class="circle ${done?"on":"off"}">${done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':""}</div>
-        <span class="pname">${p}</span>
-      </div>`;
-    });
-    html+=`</div></div></div>`;
-  });
-  html+=`</div>`;
-  app.innerHTML=html;
+html+=`<div class="list">`;
+if(filtered.length===0){html+=`<div class="empty">該当なし</div>`;}
+filtered.forEach(h=>{
+const isOpen=state.openSet.has(h.n);
+const hDone=h.p.every(p=>state.checks[p]);
+const hCnt=h.p.filter(p=>state.checks[p]).length;
+html+=`<div class="card"> <button class="card-header" onclick="toggleAcc(${h.n})"> <span class="arrow${isOpen?" open":""}">▶</span> <span class="no-badge" style="background:${grp.color}">No.${h.n}</span> <span class="card-name">${h.nm}</span> <span class="comp-badge ${hDone?"comp-done":"comp-wip"}">${hDone?"コンプ済":`${hCnt}/${h.p.length}`}</span> </button> <div class="card-body ${isOpen?"show":"shut"}"> <div class="recipe"><span class="recipe-label">作り方:</span>${h.r}</div> <div class="pgrid">`;
+h.p.forEach((p,i)=>{
+const done=!!state.checks[p];
+const surl=spriteUrl(p);
+html+=`<div class="pcell${done?" ck":""}" onclick="togglePoke('${p.replace(/'/g,"\\'")}')"> <div class="circle ${done?"on":"off"}">${done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':""}</div> ${surl?`<img class="psprite" src="${surl}" alt="" loading="lazy">`:""} <span class="pname">${p}</span> </div>`;
+});
+html+=`</div></div></div>`;
+});
+html+=`</div>`;
+app.innerHTML=html;
 }
 
-function switchGroup(id){state.group=id;state.search="";state.filter="all";render();}
+function switchGroup(id){state.group=id;state.search=””;state.filter=“all”;render();}
 function togglePoke(name){state.checks[name]=!state.checks[name];saveChecks();render();}
 function toggleAcc(n){state.openSet.has(n)?state.openSet.delete(n):state.openSet.add(n);render();}
 function toggleAll(){
-  const gHabs=getGroupHabitats();
-  const allOpen=gHabs.every(h=>state.openSet.has(h.n));
-  gHabs.forEach(h=>{allOpen?state.openSet.delete(h.n):state.openSet.add(h.n);});
-  render();
+const gHabs=getGroupHabitats();
+const allOpen=gHabs.every(h=>state.openSet.has(h.n));
+gHabs.forEach(h=>{allOpen?state.openSet.delete(h.n):state.openSet.add(h.n);});
+render();
 }
-function execSearch(){const el=document.getElementById("searchInput");if(el){state.search=el.value;render();}}
-function clearSearch(){state.search="";render();}
+function execSearch(){const el=document.getElementById(“searchInput”);if(el){state.search=el.value;render();}}
+function clearSearch(){state.search=””;render();}
 function doSearch(v){state.search=v;render();}
 function setFilter(v){state.filter=v;render();}
 
 loadChecks();
 render();
 </script>
+
 </body>
 </html>
